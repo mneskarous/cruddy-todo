@@ -3,6 +3,7 @@ const path = require('path');
 const _ = require('underscore');
 const counter = require('./counter');
 
+
 var items = {};
 
 // Public API - Fix these CRUD functions ///////////////////////////////////////
@@ -11,7 +12,7 @@ exports.create = (text, callback) => {
   counter.getNextUniqueId((err, id) => {
     fs.writeFile(exports.dataDir + `/${id}.txt`, text, (err) => {
       if (err) {
-        throw ('')
+        callback(err);
       } else {
         callback(null, { id, text });
       }
@@ -21,12 +22,12 @@ exports.create = (text, callback) => {
 
 exports.readAll = (callback) => {
   var data = [];
-  fs.readdir(exports.dataDir, (err, files) => {
+  fs.readdir(exports.dataDir, (err, fileNames) => {
     if (err) {
       callback(err);
     } else {
-      _.map(files, (id) => {
-        id = id.slice(0, 5);
+      _.each(fileNames, (fileName) => {
+        id = fileName.slice(0, fileName.length - 4);
         data.push({ id: id, text: id })
       });
       callback(null, data)
@@ -34,15 +35,12 @@ exports.readAll = (callback) => {
   })
 };
 
-
 exports.readOne = (id, callback) => {
   fs.readFile(exports.dataDir + `/${id}.txt`, 'utf8', (err, text) => {
     if (err) {
       callback(new Error(`No item with id: ${id}`));
     } else {
       callback(null, { id, text });
-      // console.log('id ', id);
-      // console.log('object', { id, text });
     }
   })
 };
